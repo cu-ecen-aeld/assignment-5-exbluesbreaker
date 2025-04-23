@@ -1,0 +1,53 @@
+#!/bin/sh
+
+do_start() {
+    /etc/init.d/module_load.sh hello
+    if [ $? -ne 0 ]; then
+        echo "Failed to load hello module"
+    fi
+    /etc/init.d/scull_load.sh
+    if [ $? -ne 0 ]; then
+        echo "Failed to load scull module"
+    fi
+    /etc/init.d/module_load.sh faulty
+    if [ $? -ne 0 ]; then
+        echo "Failed to load faulty module"
+    fi
+}
+
+do_stop() {
+    /etc/init.d/module_unload.sh faulty
+    if [ $? -ne 0 ]; then
+        echo "Failed to unload faulty module"
+    fi
+    /etc/init.d/scull_unload.sh
+    if [ $? -ne 0 ]; then
+        echo "Failed to unload scull module"
+    fi
+    /etc/init.d/module_unload.sh hello
+    if [ $? -ne 0 ]; then
+        echo "Failed to unload hello module"
+    fi
+}
+
+case "$1" in
+    start)
+        do_start
+        ;;
+    stop)
+        do_stop
+        ;;
+    restart)
+        do_stop
+        do_start
+        ;;
+    status)
+        status_of_proc -p $PIDFILE $DAEMON $DAEMON_NAME && exit 0 || exit $?
+        ;;
+    *)
+        echo "Usage: $0 {start|stop|restart|status}"
+        exit 1
+        ;;
+esac
+
+exit 0
